@@ -142,6 +142,8 @@ const SidePanel = () => {
               setIsHistoricalSession(false);
               break;
             case ExecutionState.TASK_OK:
+              // Play success sound
+              new Audio(chrome.runtime.getURL('success.mp3')).play();
               setIsFollowUpMode(true);
               setInputEnabled(true);
               setShowStopButton(false);
@@ -628,15 +630,28 @@ const SidePanel = () => {
     }
   };
 
-  const handleBookmarkUpdateTitle = async (id: number, title: string) => {
+  const handleBookmarkAdd = async () => {
     try {
-      await favoritesStorage.updatePromptTitle(id, title);
+      // Add a new prompt with default values
+      await favoritesStorage.addPrompt('New Prompt', 'Enter your prompt here.');
 
       // Update favorites in the UI
       const prompts = await favoritesStorage.getAllPrompts();
       setFavoritePrompts(prompts);
     } catch (error) {
-      console.error('Failed to update favorite prompt title:', error);
+      console.error('Failed to add favorite prompt:', error);
+    }
+  };
+
+  const handleBookmarkUpdate = async (id: number, title: string, content: string) => {
+    try {
+      await favoritesStorage.updatePrompt(id, title, content);
+
+      // Update favorites in the UI
+      const prompts = await favoritesStorage.getAllPrompts();
+      setFavoritePrompts(prompts);
+    } catch (error) {
+      console.error('Failed to update favorite prompt:', error);
     }
   };
 
@@ -1011,9 +1026,10 @@ const SidePanel = () => {
                       <BookmarkList
                         bookmarks={favoritePrompts}
                         onBookmarkSelect={handleBookmarkSelect}
-                        onBookmarkUpdateTitle={handleBookmarkUpdateTitle}
+                        onBookmarkUpdate={handleBookmarkUpdate}
                         onBookmarkDelete={handleBookmarkDelete}
                         onBookmarkReorder={handleBookmarkReorder}
+                        onBookmarkAdd={handleBookmarkAdd}
                         isDarkMode={isDarkMode}
                       />
                     </div>

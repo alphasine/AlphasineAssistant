@@ -207,6 +207,9 @@ export function createChatModel(providerConfig: ProviderConfig, modelConfig: Mod
         temperature,
         topP,
       };
+      // This is where the magic happens for Gemini.
+      // We create a new instance of ChatGoogleGenerativeAI, which is a class from the LangChain.js library.
+      // This class handles all the details of communicating with the Gemini API.
       return new ChatGoogleGenerativeAI(args);
     }
     case ProviderTypeEnum.Grok: {

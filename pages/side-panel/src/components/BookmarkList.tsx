@@ -11,33 +11,37 @@ interface Bookmark {
 interface BookmarkListProps {
   bookmarks: Bookmark[];
   onBookmarkSelect: (content: string) => void;
-  onBookmarkUpdateTitle?: (id: number, title: string) => void;
+  onBookmarkUpdate?: (id: number, title: string, content: string) => void;
   onBookmarkDelete?: (id: number) => void;
   onBookmarkReorder?: (draggedId: number, targetId: number) => void;
+  onBookmarkAdd?: () => void;
   isDarkMode?: boolean;
 }
 
 const BookmarkList: React.FC<BookmarkListProps> = ({
   bookmarks,
   onBookmarkSelect,
-  onBookmarkUpdateTitle,
+  onBookmarkUpdate,
   onBookmarkDelete,
   onBookmarkReorder,
+  onBookmarkAdd,
   isDarkMode = false,
 }) => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState<string>('');
+  const [editContent, setEditContent] = useState<string>('');
   const [draggedId, setDraggedId] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleEditClick = (bookmark: Bookmark) => {
     setEditingId(bookmark.id);
     setEditTitle(bookmark.title);
+    setEditContent(bookmark.content);
   };
 
   const handleSaveEdit = (id: number) => {
-    if (onBookmarkUpdateTitle && editTitle.trim()) {
-      onBookmarkUpdateTitle(id, editTitle);
+    if (onBookmarkUpdate && editTitle.trim()) {
+      onBookmarkUpdate(id, editTitle, editContent);
     }
     setEditingId(null);
   };
@@ -81,7 +85,20 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
 
   return (
     <div className="p-2">
-      <h3 className={`mb-3 text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Quick Start</h3>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className={`text-sm font-medium ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>Quick Start</h3>
+        {onBookmarkAdd && (
+          <button
+            onClick={onBookmarkAdd}
+            className={`rounded px-2 py-1 text-sm font-medium ${
+              isDarkMode ? 'bg-sky-700 text-sky-200 hover:bg-sky-600' : 'bg-sky-100 text-sky-600 hover:bg-sky-200'
+            }`}
+            aria-label="Add new quick start prompt"
+            type="button">
+            Add New
+          </button>
+        )}
+      </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {bookmarks.map(bookmark => (
           <div
@@ -96,37 +113,55 @@ const BookmarkList: React.FC<BookmarkListProps> = ({
             } border ${isDarkMode ? 'border-slate-700' : 'border-sky-100'}`}>
             {editingId === bookmark.id ? (
               <div className="flex items-center">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={editTitle}
-                  onChange={e => setEditTitle(e.target.value)}
-                  className={`mr-2 grow rounded px-2 py-1 text-sm ${
-                    isDarkMode ? 'border-slate-600 bg-slate-700 text-gray-200' : 'border-sky-100 bg-white text-gray-700'
-                  } border`}
-                />
-                <button
-                  onClick={() => handleSaveEdit(bookmark.id)}
-                  className={`rounded p-1 ${
-                    isDarkMode
-                      ? 'bg-slate-700 text-green-400 hover:bg-slate-600'
-                      : 'bg-white text-green-500 hover:bg-gray-100'
-                  }`}
-                  aria-label="Save edit"
-                  type="button">
-                  <FaCheck size={14} />
-                </button>
-                <button
-                  onClick={handleCancelEdit}
-                  className={`ml-1 rounded p-1 ${
-                    isDarkMode
-                      ? 'bg-slate-700 text-red-400 hover:bg-slate-600'
-                      : 'bg-white text-red-500 hover:bg-gray-100'
-                  }`}
-                  aria-label="Cancel edit"
-                  type="button">
-                  <FaTimes size={14} />
-                </button>
+                <div className="grow">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={editTitle}
+                    onChange={e => setEditTitle(e.target.value)}
+                    className={`mb-2 w-full rounded px-2 py-1 text-sm ${
+                      isDarkMode
+                        ? 'border-slate-600 bg-slate-700 text-gray-200'
+                        : 'border-sky-100 bg-white text-gray-700'
+                    } border`}
+                    aria-label="Edit bookmark title"
+                  />
+                  <textarea
+                    value={editContent}
+                    onChange={e => setEditContent(e.target.value)}
+                    className={`w-full rounded px-2 py-1 text-sm ${
+                      isDarkMode
+                        ? 'border-slate-600 bg-slate-700 text-gray-200'
+                        : 'border-sky-100 bg-white text-gray-700'
+                    } border`}
+                    rows={4}
+                    aria-label="Edit bookmark content"
+                  />
+                </div>
+                <div className="ml-2 flex flex-col">
+                  <button
+                    onClick={() => handleSaveEdit(bookmark.id)}
+                    className={`mb-1 rounded p-1 ${
+                      isDarkMode
+                        ? 'bg-slate-700 text-green-400 hover:bg-slate-600'
+                        : 'bg-white text-green-500 hover:bg-gray-100'
+                    }`}
+                    aria-label="Save edit"
+                    type="button">
+                    <FaCheck size={14} />
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className={`rounded p-1 ${
+                      isDarkMode
+                        ? 'bg-slate-700 text-red-400 hover:bg-slate-600'
+                        : 'bg-white text-red-500 hover:bg-gray-100'
+                    }`}
+                    aria-label="Cancel edit"
+                    type="button">
+                    <FaTimes size={14} />
+                  </button>
+                </div>
               </div>
             ) : (
               <>

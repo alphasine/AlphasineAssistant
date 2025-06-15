@@ -5,18 +5,24 @@ import type { BaseStorage } from '../base/types';
 // Template data
 const defaultFavoritePrompts = [
   {
-    title: '📚 Explore AI Papers',
+    title: '📰 Summarize Tech News',
     content:
-      '- Go to https://huggingface.co/papers and click through each of the top 3 upvoted papers.\n- For each paper:\n  - Record the title, URL and upvotes\n  - Summarise the abstract section\n- Finally, compile together a summary of all 3 papers, ranked by upvotes',
+      'Go to a tech news website like TechCrunch or The Verge, find the top 3 headlines, and give me a one-sentence summary for each.',
   },
   {
-    title: '🐦 Follow us on X/Twitter!',
-    content: 'Follow us at https://x.com/nanobrowser_ai to stay updated on the latest news and features!',
+    title: '🛒 Compare Product Prices',
+    content:
+      'Find the price of a "Sony WH-1000XM5" headphone on both Amazon and Best Buy\'s websites and tell me which is cheaper.',
   },
   {
-    title: '🌟 Star us on GitHub!',
+    title: '💼 Search for Jobs',
     content:
-      "Open the Nanobrowser repository at https://github.com/nanobrowser/nanobrowser and check if you've already starred it. If not, please support us by giving us a star!",
+      'Go to LinkedIn Jobs, search for "Remote Frontend Developer" positions posted in the last 24 hours. List the first 3 job titles and the companies hiring.',
+  },
+  {
+    title: '💻 Analyze GitHub Repo',
+    content:
+      'Go to the "langchain-ai/langchainjs" repository on GitHub. Find out how many open issues and open pull requests there are.',
   },
 ];
 

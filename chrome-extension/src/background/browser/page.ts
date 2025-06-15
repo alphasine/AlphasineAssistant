@@ -460,7 +460,8 @@ export default class Page {
       if (amount) {
         await this._puppeteerPage?.evaluate(`window.scrollBy(0, ${amount});`);
       } else {
-        await this._puppeteerPage?.evaluate('window.scrollBy(0, window.innerHeight);');
+        // scroll by 90% of the window height to have some overlap
+        await this._puppeteerPage?.evaluate('window.scrollBy(0, window.innerHeight * 0.9);');
       }
     }
   }
@@ -470,7 +471,8 @@ export default class Page {
       if (amount) {
         await this._puppeteerPage?.evaluate(`window.scrollBy(0, -${amount});`);
       } else {
-        await this._puppeteerPage?.evaluate('window.scrollBy(0, -window.innerHeight);');
+        // scroll by 90% of the window height to have some overlap
+        await this._puppeteerPage?.evaluate('window.scrollBy(0, -window.innerHeight * 0.9);');
       }
     }
   }
