@@ -12,7 +12,6 @@ export interface GeneralSettingsConfig {
   planningInterval: number;
   displayHighlights: boolean;
   minWaitPageLoad: number;
-  isAdvancedModeEnabled: boolean; // Added new setting
 }
 
 export type GeneralSettingsStorage = BaseStorage<GeneralSettingsConfig> & {
@@ -31,7 +30,6 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettingsConfig = {
   planningInterval: 3,
   displayHighlights: true,
   minWaitPageLoad: 250,
-  isAdvancedModeEnabled: false, // Default value for the new setting
 };
 
 const storage = createStorage<GeneralSettingsConfig>('general-settings', DEFAULT_GENERAL_SETTINGS, {
