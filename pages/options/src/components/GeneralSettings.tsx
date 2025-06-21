@@ -202,6 +202,33 @@ export const GeneralSettings = ({ isDarkMode = false }: GeneralSettingsProps) =>
               />
             </div>
           </div>
+
+          {/* Advanced Mode Toggle START */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className={`text-base font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                Enable Advanced Mode
+              </h3>
+              <p className={`text-sm font-normal ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                Use advanced features and potentially experimental settings (e.g., optimized for specific LLMs like Gemini).
+              </p>
+            </div>
+            <div className="relative inline-flex cursor-pointer items-center">
+              <input
+                id="isAdvancedModeEnabled"
+                type="checkbox"
+                checked={settings.isAdvancedModeEnabled}
+                onChange={e => updateSetting('isAdvancedModeEnabled', e.target.checked)}
+                className="peer sr-only"
+              />
+              <label
+                htmlFor="isAdvancedModeEnabled"
+                className={`peer h-6 w-11 rounded-full ${isDarkMode ? 'bg-slate-600' : 'bg-gray-200'} after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300`}>
+                <span className="sr-only">Enable Advanced Mode</span>
+              </label>
+            </div>
+          </div>
+          {/* Advanced Mode Toggle END */}
         </div>
       </div>
     </section>

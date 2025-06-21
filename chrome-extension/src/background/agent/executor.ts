@@ -15,9 +15,12 @@ import { Actors, type EventCallback, EventType, ExecutionState } from './event/t
 import { ChatModelAuthError, ChatModelForbiddenError, RequestCancelledError } from './agents/errors';
 import { wrapUntrustedContent } from './messages/utils';
 import { URLNotAllowedError } from '../browser/views';
+import { ProviderTypeEnum } from '@extension/storage'; // Added
+
 const logger = createLogger('Executor');
 
 export interface ExecutorExtraArgs {
+  navigatorLLMProviderType?: ProviderTypeEnum; // Added
   plannerLLM?: BaseChatModel;
   validatorLLM?: BaseChatModel;
   extractorLLM?: BaseChatModel;
@@ -47,7 +50,15 @@ export class Executor {
     const extractorLLM = extraArgs?.extractorLLM ?? navigatorLLM;
     const eventManager = new EventManager();
     const agentOptions = { ...DEFAULT_AGENT_OPTIONS, ...(extraArgs?.agentOptions ?? {}) };
-    const context = new AgentContext(taskId, browserContext, messageManager, eventManager, agentOptions, payload.image);
+    const context = new AgentContext(
+      taskId,
+      browserContext,
+      messageManager,
+      eventManager,
+      agentOptions,
+      payload.image,
+      extraArgs?.navigatorLLMProviderType, // Pass provider type
+    );
     messageManager.setContext(context);
 
     this.tasks.push(payload.text);
