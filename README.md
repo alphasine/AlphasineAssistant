@@ -8,7 +8,6 @@
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/alphasine/AlphasineAssistant)
 [![Twitter](https://img.shields.io/badge/Twitter-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/alphasine_ai)
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/NN3ABHggMK)
 [<img src="https://deepwiki.com/badge.svg" height="28" alt="Ask DeepWiki">](https://deepwiki.com/alphasine/AlphasineAssistant)
 
 </div>
@@ -21,9 +20,7 @@
     It provides a powerful multi-agent system, flexible LLM options, and a commitment to privacy.
   </p>
   <p>
-    <a href="https://chromewebstore.google.com/detail/AlphasineAssistant/imbddededgmcgfhfpcjmijokokekbkal"><strong>Get AlphasineAssistant from the Chrome Web Store</strong></a>
-    <br>
-    <a href="https://discord.gg/NN3ABHggMK">Join our Discord</a> | <a href="https://x.com/alphasine_ai">Follow us on X</a>
+    <a href="https://x.com/alphasine_ai">Follow us on X</a>
   </p>
 </div>
 
@@ -158,7 +155,6 @@ We are actively developing AlphasineAssistant. Check out our [roadmap](https://g
 
 We welcome contributions of all kinds! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-- **Share prompts and use cases** in our [Discord](https://discord.gg/NN3ABHggMK).
 - **Provide feedback** on performance or suggest improvements.
 - **Contribute code** by submitting a pull request.
 
@@ -168,7 +164,6 @@ If you discover a security vulnerability, please create a [GitHub Security Advis
 
 ## 💬 Community
 
-- [Discord](https://discord.gg/NN3ABHggMK): Chat with the team and community.
 - [Twitter](https://x.com/alphasine_ai): Follow for updates.
 - [GitHub Discussions](https://github.com/alphasine/AlphasineAssistant/discussions): Share ideas and ask questions.
 
