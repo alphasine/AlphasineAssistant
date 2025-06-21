@@ -2,9 +2,8 @@ import { BaseAgent, type BaseAgentOptions, type ExtraAgentOptions } from './base
 import { createLogger } from '@src/background/log';
 import { z } from 'zod';
 import type { AgentOutput } from '../types';
-import { HumanMessage, BaseMessage } from '@langchain/core/messages'; // Added BaseMessage
+import { HumanMessage } from '@langchain/core/messages';
 import { Actors, ExecutionState } from '../event/types';
-import { generalSettingsStore, ProviderTypeEnum } from '@extension/storage'; // Added
 import {
   ChatModelAuthError,
   ChatModelForbiddenError,
@@ -43,43 +42,20 @@ export const plannerOutputSchema = z.object({
 export type PlannerOutput = z.infer<typeof plannerOutputSchema>;
 
 export class PlannerAgent extends BaseAgent<typeof plannerOutputSchema, PlannerOutput> {
-  private isAdvancedGeminiMode = false;
-
   constructor(options: BaseAgentOptions, extraOptions?: Partial<ExtraAgentOptions>) {
     super(plannerOutputSchema, options, { ...extraOptions, id: 'planner' });
-    // isAdvancedGeminiMode will be initialized in an async way if needed, or before execute
-  }
-
-  private async initializeAdvancedModeCheck() {
-    const settings = await generalSettingsStore.getSettings();
-    // Assuming llmProviderType is available on this.context, set by Executor
-    const providerType = this.context.llmProviderType;
-    this.isAdvancedGeminiMode = settings.isAdvancedModeEnabled && providerType === ProviderTypeEnum.Gemini;
-    logger.info(`Planner Advanced Gemini Mode: ${this.isAdvancedGeminiMode}`);
   }
 
   async execute(): Promise<AgentOutput<PlannerOutput>> {
-    await this.initializeAdvancedModeCheck(); // Check mode before execution
-
     try {
       this.context.emitEvent(Actors.PLANNER, ExecutionState.STEP_START, 'Planning...');
+      // get all messages from the message manager, state message should be the last one
       const messages = this.context.messageManager.getMessages();
-      let systemMessage = this.prompt.getSystemMessage();
-      let plannerMessages: BaseMessage[] = [...messages.slice(1)]; // Use full message history except the first one (original system)
-
-      if (this.isAdvancedGeminiMode) {
-        // Placeholder: Potentially use a different system prompt or modify messages for Gemini Advanced Mode
-        logger.info('Planner using Advanced Mode prompt modifications (placeholder).');
-        // Example: systemMessage = new HumanMessage("You are an advanced Gemini planning assistant...");
-        // Or, modify how `plannerMessages` are constructed or formatted.
-      }
-
-      plannerMessages = [systemMessage, ...plannerMessages];
-
+      // Use full message history except the first one
+      const plannerMessages = [this.prompt.getSystemMessage(), ...messages.slice(1)];
 
       // Remove images from last message if vision is not enabled for planner but vision is enabled
-      // This logic might also be adjusted in advanced mode if Gemini handles mixed content differently.
-      if (!this.context.options.useVisionForPlanner && this.context.options.useVision && plannerMessages.length > 0) {
+      if (!this.context.options.useVisionForPlanner && this.context.options.useVision) {
         const lastStateMessage = plannerMessages[plannerMessages.length - 1];
         let newMsg = '';
 

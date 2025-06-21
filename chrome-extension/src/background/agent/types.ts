@@ -3,7 +3,6 @@ import type BrowserContext from '../browser/context';
 import type MessageManager from './messages/service';
 import type { EventManager } from './event/manager';
 import { type Actors, type ExecutionState, AgentEvent } from './event/types';
-import { ProviderTypeEnum } from '@extension/storage'; // Added
 
 export interface AgentOptions {
   maxSteps: number;
@@ -64,7 +63,6 @@ export class AgentContext {
   actionResults: ActionResult[];
   stateMessageAdded: boolean;
   image?: string;
-  llmProviderType?: ProviderTypeEnum; // Added
 
   constructor(
     taskId: string,
@@ -73,7 +71,6 @@ export class AgentContext {
     eventManager: EventManager,
     options: AgentOptions,
     image?: string,
-    llmProviderType?: ProviderTypeEnum, // Added
   ) {
     this.controller = new AbortController();
     this.taskId = taskId;
@@ -90,7 +87,6 @@ export class AgentContext {
     this.stepInfo = null;
     this.actionResults = [];
     this.stateMessageAdded = false;
-    this.llmProviderType = llmProviderType; // Added
   }
 
   async emitEvent(actor: Actors, state: ExecutionState, eventDetails: string) {

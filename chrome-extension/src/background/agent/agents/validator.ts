@@ -3,8 +3,7 @@ import { createLogger } from '@src/background/log';
 import { z } from 'zod';
 import { ActionResult, type AgentOutput } from '../types';
 import { Actors, ExecutionState } from '../event/types';
-import { HumanMessage, BaseMessage } from '@langchain/core/messages'; // Added BaseMessage
-import { generalSettingsStore, ProviderTypeEnum } from '@extension/storage'; // Added
+import { HumanMessage } from '@langchain/core/messages';
 import {
   ChatModelAuthError,
   ChatModelForbiddenError,
@@ -33,20 +32,10 @@ export const validatorOutputSchema = z.object({
 export type ValidatorOutput = z.infer<typeof validatorOutputSchema>;
 
 export class ValidatorAgent extends BaseAgent<typeof validatorOutputSchema, ValidatorOutput> {
-  private plan: string | null = null; // Current plan to validate against
-  private isAdvancedGeminiMode = false;
-
+  // sometimes we need to validate the output against both the current browser state and the plan
+  private plan: string | null = null;
   constructor(options: BaseAgentOptions, extraOptions?: Partial<ExtraAgentOptions>) {
     super(validatorOutputSchema, options, { ...extraOptions, id: 'validator' });
-    // isAdvancedGeminiMode will be initialized if needed
-  }
-
-  private async initializeAdvancedModeCheck() {
-    const settings = await generalSettingsStore.getSettings();
-    // Assuming llmProviderType is available on this.context, set by Executor
-    const providerType = this.context.llmProviderType;
-    this.isAdvancedGeminiMode = settings.isAdvancedModeEnabled && providerType === ProviderTypeEnum.Gemini;
-    logger.info(`Validator Advanced Gemini Mode: ${this.isAdvancedGeminiMode}`);
   }
 
   /**
@@ -62,43 +51,19 @@ export class ValidatorAgent extends BaseAgent<typeof validatorOutputSchema, Vali
    * @returns AgentOutput<ValidatorOutput>
    */
   async execute(): Promise<AgentOutput<ValidatorOutput>> {
-    await this.initializeAdvancedModeCheck(); // Check mode before execution
-
     try {
       this.context.emitEvent(Actors.VALIDATOR, ExecutionState.STEP_START, 'Validating...');
 
-      let userMessageContent = await this.prompt.getUserMessageContent(this.context); // Get raw content
+      let stateMessage = await this.prompt.getUserMessage(this.context);
       if (this.plan) {
-        userMessageContent = `${userMessageContent}\n\nThe current plan is: \n${this.plan}`;
+        // merge the plan and the state message
+        const mergedMessage = new HumanMessage(`${stateMessage.content}\n\nThe current plan is: \n${this.plan}`);
+        stateMessage = mergedMessage;
       }
+      // logger.info('validator input', stateMessage);
 
-      let systemMessage = this.prompt.getSystemMessage();
-      let finalUserMessage: BaseMessage = new HumanMessage(userMessageContent);
-
-      if (this.isAdvancedGeminiMode) {
-        // Placeholder: Potentially use a different system prompt or modify messages for Gemini Advanced Mode
-        logger.info('Validator using Advanced Mode prompt modifications (placeholder).');
-        // Example: systemMessage = new HumanMessage("You are an advanced Gemini validation expert...");
-        // Or, adjust how `finalUserMessage` is constructed or its type if Gemini expects specific formatting
-        // For multimodal, ensure image parts are correctly included if this.context.screenshot is available
-        // and userMessageContent needs to be an array of MessageContentParts
-      }
-
-      // Reconstruct finalUserMessage if it needs to be multimodal and vision is enabled
-      if (this.context.options.useVision && this.context.screenshot) {
-         if (typeof userMessageContent === 'string') { // Ensure it's a string before creating parts
-            finalUserMessage = new HumanMessage({
-                content: [
-                    { type: "text", text: userMessageContent },
-                    { type: "image_url", image_url: { url: `data:image/jpeg;base64,${this.context.screenshot}` } },
-                ]
-            });
-         }
-      }
-
-
-      const inputMessages: BaseMessage[] = [systemMessage, finalUserMessage];
-      // logger.info('Validator input messages:', JSON.stringify(inputMessages, null, 2));
+      const systemMessage = this.prompt.getSystemMessage();
+      const inputMessages = [systemMessage, stateMessage];
 
       const modelOutput = await this.invoke(inputMessages);
       if (!modelOutput) {
