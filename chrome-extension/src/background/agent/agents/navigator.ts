@@ -2,11 +2,15 @@ import { z } from 'zod';
 import { BaseAgent, type BaseAgentOptions, type ExtraAgentOptions } from './base';
 import { createLogger } from '@src/background/log';
 import { ActionResult, type AgentOutput } from '../types';
-import type { Action } from '../actions/builder';
+import type { Action, ActionInput } from '../actions/builder'; // Added ActionInput
 import { buildDynamicActionSchema } from '../actions/builder';
 import { agentBrainSchema } from '../types';
-import { type BaseMessage, HumanMessage } from '@langchain/core/messages';
+import { type BaseMessage, HumanMessage, AIMessage } from '@langchain/core/messages'; // Added AIMessage
 import { Actors, ExecutionState } from '../event/types';
+// Langchain specific imports for Gemini function calling
+import { formatToGoogleGenerativeAIFunction } from '@langchain/google-genai';
+import { JsonOutputFunctionsParser } from 'langchain/output_parsers/openai_functions';
+import { generalSettingsStore, ProviderTypeEnum } from '@extension/storage'; // Added generalSettingsStore & ProviderTypeEnum
 import {
   ChatModelAuthError,
   ChatModelForbiddenError,
@@ -43,6 +47,10 @@ export class NavigatorActionRegistry {
     return this.actions[name];
   }
 
+  getActions(): Action[] {
+    return Object.values(this.actions);
+  }
+
   setupModelOutputSchema(): z.ZodType {
     const actionSchema = buildDynamicActionSchema(Object.values(this.actions));
     return z.object({
@@ -56,9 +64,16 @@ export interface NavigatorResult {
   done: boolean;
 }
 
+// Define the expected output structure for Gemini function calling
+// This will be an array of objects, where each object has a function name and its arguments
+type GeminiFunctionCallOutput = Array<{
+  [key: string]: ActionInput; // Function name maps to its arguments
+}>;
+
 export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
   private actionRegistry: NavigatorActionRegistry;
-  private jsonSchema: Record<string, unknown>;
+  private jsonSchema: Record<string, unknown>; // For standard structured output
+  private isAdvancedGeminiMode = false; // Flag for advanced mode
 
   constructor(
     actionRegistry: NavigatorActionRegistry,
@@ -66,16 +81,91 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
     extraOptions?: Partial<ExtraAgentOptions>,
   ) {
     super(actionRegistry.setupModelOutputSchema(), options, { ...extraOptions, id: 'navigator' });
-
     this.actionRegistry = actionRegistry;
-
-    // The zod object is too complex to be used directly, so we need to convert it to json schema first for the model to use
     this.jsonSchema = convertZodToJsonSchema(this.modelOutputSchema, 'NavigatorAgentOutput', true);
+    // We'll set isAdvancedGeminiMode properly in an async init or before execute
   }
 
-  async invoke(inputMessages: BaseMessage[]): Promise<this['ModelOutput']> {
-    // Use structured output
-    if (this.withStructuredOutput) {
+  private async initializeAdvancedModeCheck() {
+    const settings = await generalSettingsStore.getSettings();
+    const providerType = this.context.llmProviderType; // Assuming llmProviderType is available in context
+    this.isAdvancedGeminiMode = settings.isAdvancedModeEnabled && providerType === ProviderTypeEnum.Gemini;
+    logger.info(`Navigator Advanced Gemini Mode: ${this.isAdvancedGeminiMode}`);
+  }
+
+  async invoke(inputMessages: BaseMessage[]): Promise<any> { // Return type changed to any for flexibility
+    if (this.isAdvancedGeminiMode) {
+      // Logic for Gemini native function calling
+      const functions = this.actionRegistry.getActions().map(action =>
+        formatToGoogleGenerativeAIFunction({
+          name: action.name(),
+          description: action.description(),
+          parameters: action.parametersDefinition() as z.ZodObject<any, any, any>, // Cast needed
+        }),
+      );
+
+      const llmWithFunctions = this.chatLLM.bind({ functions });
+      const aiMessage = await llmWithFunctions.invoke(inputMessages, { signal: this.context.controller.signal, ...this.callOptions });
+
+      // Parse the tool calls from AIMessage
+      // The actual parsing might need adjustment based on how LangChain's Gemini wrapper structures tool_calls
+      // For now, assuming it's somewhat similar to OpenAI's or requires a specific parser.
+      // This part is CRUCIAL and might need debugging with actual Gemini responses.
+      const toolCalls = (aiMessage as AIMessage).additional_kwargs?.tool_calls || (aiMessage as AIMessage).additional_kwargs?.function_call;
+      logger.info('Gemini raw tool_calls:', JSON.stringify(toolCalls, null, 2));
+
+
+      if (toolCalls && Array.isArray(toolCalls)) {
+        const parsedActions: GeminiFunctionCallOutput = toolCalls.map((call: any) => {
+          // Adjust this based on actual structure of Gemini tool_calls from LangChain
+          // This assumes call.function.name and JSON.parse(call.function.arguments)
+          const functionName = call.function?.name;
+          let functionArgs = {};
+          try {
+            functionArgs = call.function?.arguments ? JSON.parse(call.function.arguments) : {};
+          } catch (e) {
+            logger.error(`Error parsing Gemini function arguments for ${functionName}:`, e);
+            // Potentially try to repair JSON if that's a common issue
+             try {
+                const repairedArgs = repairJsonString(call.function.arguments);
+                functionArgs = JSON.parse(repairedArgs);
+                logger.info(`Successfully parsed repaired arguments for ${functionName}`);
+             } catch (repairError) {
+                logger.error(`Failed to parse even repaired arguments for ${functionName}:`, repairError);
+                // Decide how to handle: skip this action, error out, etc.
+             }
+          }
+          if (functionName) {
+            return { [functionName]: functionArgs };
+          }
+          return null;
+        }).filter(action => action !== null) as GeminiFunctionCallOutput;
+
+        logger.info('Parsed Gemini actions:', JSON.stringify(parsedActions, null, 2));
+        // We need to wrap this to match the expected structure of doMultiAction if possible,
+        // or adapt doMultiAction. For now, let's return the direct parsed actions.
+        // The existing `addModelOutputToMemory` expects a specific structure.
+        // The `doMultiAction` also expects `response.action`.
+        // Let's construct a compatible structure.
+        return { current_state: { reasoning: "Function call via Gemini Advanced Mode", text: "" }, action: parsedActions };
+
+      } else if (toolCalls && typeof toolCalls === 'object' && (toolCalls as any).function?.name) { // Single function call case
+        const call = toolCalls as any;
+        const functionName = call.function.name;
+        let functionArgs = {};
+        try {
+            functionArgs = call.function.arguments ? JSON.parse(call.function.arguments) : {};
+        } catch (e) { logger.error(`Error parsing single Gemini function arguments for ${functionName}:`, e); }
+         logger.info('Parsed single Gemini action:', JSON.stringify({ [functionName]: functionArgs }, null, 2));
+        return { current_state: { reasoning: "Single function call via Gemini Advanced Mode", text: "" }, action: [{ [functionName]: functionArgs }] };
+      }
+
+      logger.warn('No tool calls found in Gemini response or format not recognized as array/object.', aiMessage.content);
+      // Fallback or handle cases where no function call was made but text content exists
+      return { current_state: { reasoning: "No function call made by Gemini.", text: typeof aiMessage.content === 'string' ? aiMessage.content : JSON.stringify(aiMessage.content) }, action: [] };
+
+    } else if (this.withStructuredOutput) {
+      // Standard structured output logic (existing code)
       const structuredLlm = this.chatLLM.withStructuredOutput(this.jsonSchema, {
         includeRaw: true,
         name: this.modelOutputToolName,
@@ -99,7 +189,6 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
         throw new Error(errorMessage);
       }
 
-      // Use type assertion to access the properties
       const rawResponse = response.raw as BaseMessage & {
         tool_calls?: Array<{
           args: {
@@ -109,60 +198,55 @@ export class NavigatorAgent extends BaseAgent<z.ZodType, NavigatorResult> {
         }>;
       };
 
-      // sometimes LLM returns an empty content, but with one or more tool calls, so we need to check the tool calls
       if (rawResponse.tool_calls && rawResponse.tool_calls.length > 0) {
         logger.info('Navigator structuredLlm tool call with empty content', rawResponse.tool_calls);
-        // only use the first tool call
         const toolCall = rawResponse.tool_calls[0];
         return {
           current_state: toolCall.args.currentState,
           action: [...toolCall.args.action],
         };
       }
-      throw new Error('Could not parse response');
+      throw new Error('Could not parse response for standard structured output');
     }
-    throw new Error('Navigator needs to work with LLM that supports tool calling');
+    throw new Error('Navigator configuration error: No valid invocation method.');
   }
 
-  async execute(): Promise<AgentOutput<NavigatorResult>> {
-    const agentOutput: AgentOutput<NavigatorResult> = {
-      id: this.id,
-    };
 
+  async execute(): Promise<AgentOutput<NavigatorResult>> {
+    await this.initializeAdvancedModeCheck(); // Check mode before execution
+
+    const agentOutput: AgentOutput<NavigatorResult> = { id: this.id };
     let cancelled = false;
 
     try {
       this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.STEP_START, 'Navigating...');
-
       const messageManager = this.context.messageManager;
-      // add the browser state message
       await this.addStateMessageToMemory();
-      // check if the task is paused or stopped
+
       if (this.context.paused || this.context.stopped) {
         cancelled = true;
         return agentOutput;
       }
 
-      // call the model to get the actions to take
       const inputMessages = messageManager.getMessages();
-      // logger.info('Navigator input message', inputMessages[inputMessages.length - 1]);
+      const modelOutput = await this.invoke(inputMessages); // invoke handles advanced mode internally
 
-      const modelOutput = await this.invoke(inputMessages);
-
-      // check if the task is paused or stopped
       if (this.context.paused || this.context.stopped) {
         cancelled = true;
         return agentOutput;
       }
-      // remove the last state message from memory before adding the model output
+
       this.removeLastStateMessageFromMemory();
+      // Ensure modelOutput is added in a consistent format for addModelOutputToMemory
+      // If Gemini mode returns a different structure, it needs to be adapted here or in invoke.
+      // The current `invoke` for Gemini mode tries to return a compatible structure.
       this.addModelOutputToMemory(modelOutput);
 
-      // take the actions
+
       const actionResults = await this.doMultiAction(modelOutput);
       this.context.actionResults = actionResults;
 
-      // check if the task is paused or stopped
+      if (this.context.paused || this.context.stopped) {
       if (this.context.paused || this.context.stopped) {
         cancelled = true;
         return agentOutput;

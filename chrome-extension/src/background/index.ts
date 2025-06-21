@@ -272,14 +272,16 @@ async function setupExecutor(
   }
   // Log the provider config being used for the navigator
   const navigatorProviderConfig = providers[navigatorModel.provider];
-  const navigatorLLM = createChatModel(navigatorProviderConfig, navigatorModel);
+  // Now createChatModel is async
+  const navigatorLLM = await createChatModel(navigatorProviderConfig, navigatorModel);
 
   let plannerLLM: BaseChatModel | null = null;
   const plannerModel = agentModels[AgentNameEnum.Planner];
   if (plannerModel) {
     // Log the provider config being used for the planner
     const plannerProviderConfig = providers[plannerModel.provider];
-    plannerLLM = createChatModel(plannerProviderConfig, plannerModel);
+    // Now createChatModel is async
+    plannerLLM = await createChatModel(plannerProviderConfig, plannerModel);
   }
 
   let validatorLLM: BaseChatModel | null = null;
@@ -287,7 +289,8 @@ async function setupExecutor(
   if (validatorModel) {
     // Log the provider config being used for the validator
     const validatorProviderConfig = providers[validatorModel.provider];
-    validatorLLM = createChatModel(validatorProviderConfig, validatorModel);
+    // Now createChatModel is async
+    validatorLLM = await createChatModel(validatorProviderConfig, validatorModel);
   }
 
   // Apply firewall settings to browser context
@@ -317,6 +320,7 @@ async function setupExecutor(
   };
 
   const executor = new Executor(payload, taskId, browserContext, llms[AgentNameEnum.Navigator], {
+    navigatorLLMProviderType: navigatorProviderConfig.type, // Pass provider type
     plannerLLM: llms[AgentNameEnum.Planner],
     validatorLLM: llms[AgentNameEnum.Validator],
     agentOptions: {

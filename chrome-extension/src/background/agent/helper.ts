@@ -1,4 +1,9 @@
-import { type ProviderConfig, type ModelConfig, ProviderTypeEnum } from '@extension/storage';
+import {
+  type ProviderConfig,
+  type ModelConfig,
+  ProviderTypeEnum,
+  generalSettingsStore, // Import generalSettingsStore
+} from '@extension/storage';
 import { ChatOpenAI, AzureChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
@@ -163,9 +168,11 @@ function createAzureChatModel(providerConfig: ProviderConfig, modelConfig: Model
 }
 
 // create a chat model based on the agent name, the model name and provider
-export function createChatModel(providerConfig: ProviderConfig, modelConfig: ModelConfig): BaseChatModel {
+// Marked as async because we now fetch general settings
+export async function createChatModel(providerConfig: ProviderConfig, modelConfig: ModelConfig): Promise<BaseChatModel> {
   const temperature = (modelConfig.parameters?.temperature ?? 0.1) as number;
   const topP = (modelConfig.parameters?.topP ?? 0.1) as number;
+  const generalSettings = await generalSettingsStore.getSettings(); // Fetch general settings
 
   // Check if the provider is an Azure provider with a custom ID (e.g. azure_openai_2)
   const isAzure = isAzureProvider(modelConfig.provider);
@@ -201,15 +208,20 @@ export function createChatModel(providerConfig: ProviderConfig, modelConfig: Mod
       return new ChatDeepSeek(args) as BaseChatModel;
     }
     case ProviderTypeEnum.Gemini: {
-      const args = {
-        model: modelConfig.modelName,
+      const args: ConstructorParameters<typeof ChatGoogleGenerativeAI>[0] = {
+        modelName: modelConfig.modelName, // Corrected to modelName for ChatGoogleGenerativeAI
         apiKey: providerConfig.apiKey,
         temperature,
         topP,
+        // Additional configuration for Advanced Mode can be added here
       };
-      // This is where the magic happens for Gemini.
-      // We create a new instance of ChatGoogleGenerativeAI, which is a class from the LangChain.js library.
-      // This class handles all the details of communicating with the Gemini API.
+      if (generalSettings.isAdvancedModeEnabled) {
+        // Apply advanced settings if enabled
+        // For example, enable native function calling or set specific parameters
+        // This is a placeholder for more specific advanced configurations.
+        // args.generationConfig = { ...args.generationConfig, someAdvancedParam: true };
+        console.log('Advanced Mode enabled for Gemini model:', modelConfig.modelName);
+      }
       return new ChatGoogleGenerativeAI(args);
     }
     case ProviderTypeEnum.Grok: {
