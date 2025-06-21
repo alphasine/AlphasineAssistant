@@ -22,6 +22,16 @@
 chrome-extension/public/manifest.json
 **/tailwind-output.css
 
+# AlphasineAssistant
+.alphasineassistant
+.alphasineassistant-testing
+
 .nanobrowser
 .vscode
 *.py
+
+# Chrome Extension
+chrome-extension/dist
+
+# others
+pnpm-lock.yaml

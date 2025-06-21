@@ -1,44 +1,43 @@
-# Privacy Policy for Nanobrowser
+# Privacy Policy for AlphasineAssistant
 
 ## Introduction
 
-[Nanobrowser](https://github.com/nanobrowser/nanobrowser) is an open-source AI web automation tool that runs in your browser as a Chrome extension. This Privacy Policy explains how Nanobrowser handles your data and protects your privacy.
+[AlphasineAssistant](https://github.com/alphasine/AlphasineAssistant) is an open-source AI web automation tool that runs in your browser as a Chrome extension. This Privacy Policy explains how AlphasineAssistant handles your data and protects your privacy.
 
-## Open Source Commitment
+## Open Source and Transparent
 
-Nanobrowser is an open-source project licensed under the Apache License 2.0. All source code is publicly available in our [GitHub repository](https://github.com/nanobrowser/nanobrowser), ensuring complete transparency in how the application functions and processes data.
+AlphasineAssistant is an open-source project licensed under the Apache License 2.0. All source code is publicly available in our [GitHub repository](https://github.com/alphasine/AlphasineAssistant), ensuring complete transparency in how the application functions and processes data.
 
-## Data Collection and Processing
+## Data Handling
 
-### Local Processing
-- Nanobrowser operates entirely within your browser as a Chrome extension.
-- Your login credentials and browser cookies are never extracted or transmitted outside your browser.
-- No user data is collected, stored, or processed by Nanobrowser developers.
+### Local Data Storage
 
-### LLM Provider Interactions
-- When using Nanobrowser's AI features, web page data (including screenshots and HTML content) are sent directly to the large language model (LLM) provider you have chosen.
-- This data transmission is necessary for the AI functionality to work properly.
-- No third-party platforms besides your selected LLM provider will have access to this data.
-- Your data privacy is subject to the privacy policies of your chosen LLM provider.
+- AlphasineAssistant operates entirely within your browser as a Chrome extension.
+- No user data is collected, stored, or processed by AlphasineAssistant developers.
+- All your data, including settings, API keys, and conversation history, is stored locally on your device.
+
+### Data Sent to LLM Providers
+
+- When using AlphasineAssistant's AI features, web page data (including screenshots and HTML content) are sent directly to the large language model (LLM) provider you have chosen.
+- This data is processed by the LLM provider to generate responses and perform automation tasks.
+- We recommend reviewing the privacy policy of your chosen LLM provider to understand how they handle your data.
 
 ## API Keys
 
-- Nanobrowser requires you to provide your own API keys for LLM providers.
-- These API keys are stored locally in your browser and are never transmitted to Nanobrowser servers.
-- You are responsible for managing and securing your API keys according to the LLM provider's terms of service.
+- AlphasineAssistant requires you to provide your own API keys for LLM providers.
+- These API keys are stored locally in your browser and are never transmitted to AlphasineAssistant servers.
+- You have full control over your API keys and can revoke them at any time.
 
-## User Control and Rights
+## User Control
 
-- You have complete control over your data within Nanobrowser.
-- You can clear your conversation history and settings at any time through the extension interface.
-- You can uninstall the extension to remove all locally stored data.
+- You have complete control over your data within AlphasineAssistant.
+- You can clear your conversation history, delete your settings, and manage your API keys at any time.
+- Since all data is stored locally, uninstalling the extension will permanently delete all your data.
 
-## Changes to This Privacy Policy
+## Changes to This Policy
 
-We may update this Privacy Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We encourage you to review this Privacy Policy periodically.
+We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.
 
 ## Contact Us
 
-If you have any questions or concerns about this Privacy Policy, please contact us at cws@felight.xyz
-
-Last Updated: March 5, 2025
+If you have any questions about this Privacy Policy, please contact us through our [GitHub Discussions](https://github.com/alphasine/AlphasineAssistant/discussions) or our [Discord server](https://discord.gg/NN3ABHggMK).

@@ -1,252 +1,189 @@
 <h1 align="center">
-    <img src="https://github.com/user-attachments/assets/ec60b0c4-87ba-48f4-981a-c55ed0e8497b" height="100" width="375" alt="banner" /><br>
+  <a href="https://github.com/alphasine/AlphasineAssistant">
+    <img src="./chrome-extension/public/AlphasineAssistant-banner.png" alt="AlphasineAssistant Banner" height="100" width="375">
+  </a>
 </h1>
-
 
 <div align="center">
 
-[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/alphasine)
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/alphasine/AlphasineAssistant)
 [![Twitter](https://img.shields.io/badge/Twitter-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/alphasine_ai)
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/NN3ABHggMK)
 [<img src="https://deepwiki.com/badge.svg" height="28" alt="Ask DeepWiki">](https://deepwiki.com/alphasine/AlphasineAssistant)
 
 </div>
 
-## 🌐 AlphasineAssistant
-
-AlphasineAssistant is an open-source AI web automation tool that runs in your browser. A free alternative to OpenAI Operator with flexible LLM options and multi-agent system.
-
-⬇️ Get [AlphasineAssistant from Chrome Web Store](https://chromewebstore.google.com/detail/AlphasineAssistant/imbddededgmcgfhfpcjmijokokekbkal) for free
-
-👏 Join the community in [Discord](https://discord.gg/NN3ABHggMK) | [X](https://x.com/alphasine_ai)
-
-❤️ Loving AlphasineAssistant? Give us a star 🌟 and help spread the word!
-
 <div align="center">
-<img src="https://github.com/user-attachments/assets/112c4385-7b03-4b81-a352-4f348093351b" width="600" alt="AlphasineAssistant Demo GIF" />
-<p><em>AlphasineAssistant's multi-agent system analyzing HuggingFace in real-time, with the Planner intelligently self-correcting when encountering obstacles and dynamically instructing the Navigator to adjust its approach—all running locally in your browser.</em></p>
+  <br>
+  <p>
+    <strong>AlphasineAssistant</strong> is a free, open-source AI web automation tool that runs as a Chrome extension.
+    <br>
+    It provides a powerful multi-agent system, flexible LLM options, and a commitment to privacy.
+  </p>
+  <p>
+    <a href="https://chromewebstore.google.com/detail/AlphasineAssistant/imbddededgmcgfhfpcjmijokokekbkal"><strong>Get AlphasineAssistant from the Chrome Web Store</strong></a>
+    <br>
+    <a href="https://discord.gg/NN3ABHggMK">Join our Discord</a> | <a href="https://x.com/alphasine_ai">Follow us on X</a>
+  </p>
 </div>
 
-## 🔥Why AlphasineAssistant?
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/112c4385-7b03-4b81-a352-4f348093351b" width="600" alt="AlphasineAssistant Demo GIF" />
+  <p>
+    <em>AlphasineAssistant's multi-agent system analyzing HuggingFace in real-time, with the Planner intelligently self-correcting when encountering obstacles and dynamically instructing the Navigator to adjust its approach—all running locally in your browser.</em>
+  </p>
+</div>
 
-Looking for a powerful AI web agent without the $200/month price tag of OpenAI Operator? **AlphasineAssistant** , as a chrome extension, delivers premium web automation capabilities while keeping you in complete control:
+## 🔥 Why AlphasineAssistant?
 
-- **100% Free** - No subscription fees or hidden costs. Just install and use your own API keys, and you only pay what you use with your own API keys.
-- **Privacy-Focused** - Everything runs in your local browser. Your credentials stay with you, never shared with any cloud service.
-- **Flexible LLM Options** - Connect to your preferred LLM providers with the freedom to choose different models for different agents.
-- **Fully Open Source** - Complete transparency in how your browser is automated. No black boxes or hidden processes.
+**AlphasineAssistant** is a Chrome extension that offers premium web automation capabilities while ensuring you remain in complete control. It is a powerful AI web agent without the high costs of alternatives like OpenAI Operator.
 
-> **Note:** We currently support OpenAI, Anthropic, Gemini, Ollama, Groq, Cerebras and custom OpenAI-Compatible providers, more providers will be supported.
+- **100% Free & Open Source**: No subscription fees or hidden costs. Use your own API keys and only pay for what you use.
+- **Privacy-Focused**: Everything runs locally in your browser. Your credentials and data are never shared with any cloud service.
+- **Flexible LLM Options**: Connect to your preferred LLM providers and choose different models for different agents.
 
+> **Note**: We currently support OpenAI, Anthropic, Gemini, Ollama, Groq, Cerebras, and custom OpenAI-compatible providers, with more to come.
 
 ## 📊 Key Features
 
-- **Multi-agent System**: Specialized AI agents collaborate to accomplish complex web workflows
-- **Interactive Side Panel**: Intuitive chat interface with real-time status updates
-- **Task Automation**: Seamlessly automate repetitive web automation tasks across websites
-- **Follow-up Questions**: Ask contextual follow-up questions about completed tasks
-- **Conversation History**: Easily access and manage your AI agent interaction history
-- **Multiple LLM Support**: Connect your preferred LLM providers and assign different models to different agents
-
+- **Multi-Agent System**: Specialized AI agents collaborate to accomplish complex web workflows.
+- **Interactive Side Panel**: An intuitive chat interface with real-time status updates.
+- **Task Automation**: Seamlessly automate repetitive tasks across various websites.
+- **Follow-up Questions**: Ask contextual follow-up questions about completed tasks.
+- **Conversation History**: Easily access and manage your interaction history with the AI agents.
+- **Multiple LLM Support**: Connect your preferred LLM providers and assign different models to different agents.
 
 ## 🌐 Browser Support
 
-**Officially Supported:**
-- **Chrome** - Full support with all features
-- **Edge** - Full support with all features
+| Browser | Support Level      |
+| :------ | :----------------- |
+| Chrome  | ✅ Full Support    |
+| Edge    | ✅ Full Support    |
+| Others  | ❌ Not Supported |
 
-**Not Supported:**
-- Firefox, Safari, and other Chromium variants (Opera, Arc, etc.)
-
-> **Note**: While AlphasineAssistant may function on other Chromium-based browsers, we recommend using Chrome or Edge for the best experience and guaranteed compatibility.
-
+> While AlphasineAssistant may function on other Chromium-based browsers (e.g., Opera, Arc), we recommend using Chrome or Edge for the best experience.
 
 ## 🚀 Quick Start
 
-1. **Install from Chrome Web Store** (Stable Version):
-   * Visit the [AlphasineAssistant Chrome Web Store page](https://chromewebstore.google.com/detail/AlphasineAssistant/imbddededgmcgfhfpcjmijokokekbkal)
-   * Click "Add to Chrome" button
-   * Confirm the installation when prompted
+1.  **Install from Chrome Web Store**:
+    - Visit the [AlphasineAssistant Chrome Web Store page](https://chromewebstore.google.com/detail/AlphasineAssistant/imbddededgmcgfhfpcjmijokokekbkal).
+    - Click "Add to Chrome" and confirm the installation.
 
-> **Important Note**: For latest features, install from ["Manually Install Latest Version"](#-manually-install-latest-version) below, as Chrome Web Store version may be delayed due to review process.
+2.  **Configure Agent Models**:
+    - Open the AlphasineAssistant sidebar and click the `Settings` icon.
+    - Add your LLM API keys and choose the models for the Navigator, Planner, and Validator agents.
 
-2. **Configure Agent Models**:
-   * Click the AlphasineAssistant icon in your toolbar to open the sidebar
-   * Click the `Settings` icon (top right)
-   * Add your LLM API keys
-   * Choose which model to use for different agents (Navigator, Planner, Validator)
+> For the latest features, we recommend a manual installation, as the Chrome Web Store version may have review delays.
 
-## 🔧 Manually Install Latest Version
+## 🔧 Manual Installation
 
-To get the most recent version with all the latest features:
+To get the most recent version, follow these steps:
 
-1. **Download**
-    * Download the latest `AlphasineAssistant.zip` file from the official Github [release page](https://github.com/alphasine/AlphasineAssistant/releases).
+1.  **Download**:
+    - Get the latest `AlphasineAssistant.zip` from the [releases page](https://github.com/alphasine/AlphasineAssistant/releases).
 
-2. **Install**:
-    * Unzip `AlphasineAssistant.zip`.
-    * Open `chrome://extensions/` in Chrome
-    * Enable `Developer mode` (top right)
-    * Click `Load unpacked` (top left)
-    * Select the unzipped `AlphasineAssistant` folder.
+2.  **Install**:
+    - Unzip the file.
+    - Open `chrome://extensions/` in Chrome, enable `Developer mode`, and click `Load unpacked`.
+    - Select the unzipped `AlphasineAssistant` folder.
 
-3. **Configure Agent Models**
-    * Click the AlphasineAssistant icon in your toolbar to open the sidebar
-    * Click the `Settings` icon (top right).
-    * Add your LLM API keys.
-    * Choose which model to use for different agents (Navigator, Planner, Validator)
+3.  **Configure**:
+    - Follow the configuration steps from the Quick Start section.
 
-4. **Upgrading**:
-    * Download the latest `AlphasineAssistant.zip` file from the release page.
-    * Unzip and replace your existing AlphasineAssistant files with the new ones.
-    * Go to `chrome://extensions/` in Chrome and click the refresh icon on the AlphasineAssistant card.
+4.  **Upgrade**:
+    - Replace your existing `AlphasineAssistant` files with the new ones from the latest release.
+    - Refresh the extension on the `chrome://extensions/` page.
 
 ## 🛠️ Build from Source
 
-If you prefer to build AlphasineAssistant yourself, follow these steps:
+1.  **Prerequisites**:
+    - [Node.js](https://nodejs.org/) (v22.12.0 or higher)
+    - [pnpm](https://pnpm.io/installation) (v9.15.1 or higher)
 
-1. **Prerequisites**:
-   * [Node.js](https://nodejs.org/) (v22.12.0 or higher)
-   * [pnpm](https://pnpm.io/installation) (v9.15.1 or higher)
+2.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/alphasine/AlphasineAssistant.git
+    cd AlphasineAssistant
+    ```
 
-2. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/alphasine/AlphasineAssistant.git
-   cd AlphasineAssistant
-   ```
+3.  **Install Dependencies**:
+    ```bash
+    pnpm install
+    ```
 
-3. **Install Dependencies**:
-   ```bash
-   pnpm install
-   ```
+4.  **Build the Extension**:
+    ```bash
+    pnpm build
+    ```
 
-4. **Build the Extension**:
-   ```bash
-   pnpm build
-   ```
+5.  **Load the Extension**:
+    - The built extension will be in the `dist` directory.
+    - Follow the manual installation steps to load the extension.
 
-5. **Load the Extension**:
-   * The built extension will be in the `dist` directory
-   * Follow the installation steps from the Manually Install section to load the extension into your browser
+6.  **Development Mode** (optional):
+    ```bash
+    pnpm dev
+    ```
 
-6. **Development Mode** (optional):
-   ```bash
-   pnpm dev
-   ```
+## 🤖 Model Recommendations
 
-## 🤖 Choosing Your Models
+AlphasineAssistant allows you to configure different LLMs for each agent to balance performance and cost.
 
-AlphasineAssistant allows you to configure different LLM models for each agent to balance performance and cost. Here are recommended configurations:
+| Configuration         | Planner & Validator         | Navigator                  | Notes                                            |
+| :-------------------- | :-------------------------- | :------------------------- | :----------------------------------------------- |
+| **Better Performance**| Claude 3.7 Sonnet           | Claude 3.5 Haiku           | Better reasoning and reliable task validation.   |
+| **Cost-Effective**    | Claude Haiku or GPT-4o      | Gemini 2.0 Flash or GPT-4o-mini | May require more iterations for complex tasks.   |
+| **Local Models**      | Qwen3 14B, Falcon3 10B, etc.| Qwen3 14B, Falcon3 10B, etc.| Requires specific and clean prompts.             |
 
-### Better Performance
-- **Planner & Validator**: Claude 3.7 Sonnet
-  - Better reasoning and planning capabilities
-  - More reliable task validation
-- **Navigator**: Claude 3.5 Haiku
-  - Efficient for web navigation tasks
-  - Good balance of performance and cost
+> **Note**: For local models, use Ollama or other custom OpenAI-compatible providers.
 
-### Cost-Effective Configuration
-- **Planner & Validator**: Claude Haiku or GPT-4o
-  - Reasonable performance at lower cost
-  - May require more iterations for complex tasks
-- **Navigator**: Gemini 2.0 Flash or GPT-4o-mini
-  - Lightweight and cost-efficient
-  - Suitable for basic navigation tasks
+## 💡 Examples
 
-### Local Models
-- **Setup Options**:
-  - Use Ollama or other custom OpenAI-compatible providers to run models locally
-  - Zero API costs and complete privacy with no data leaving your machine
+Here are some tasks you can accomplish with a single sentence:
 
-- **Recommended Models**:
-  - **Qwen3 14B**
-  - **Falcon3 10B**
-  - **Qwen 2.5 Coder 14B**
-  - **Mistral Small 24B**
-  - We welcome community experience sharing with other local models in our [Discord](https://discord.gg/NN3ABHggMK)
+1.  **News Summary**:
+    > "Go to TechCrunch and extract the top 10 headlines from the last 24 hours."
 
-- **Prompt Engineering**:
-  - Local models require more specific and cleaner prompts
-  - Avoid high-level, ambiguous commands
-  - Break complex tasks into clear, detailed steps
-  - Provide explicit context and constraints
+2.  **GitHub Research**:
+    > "Find the trending Python repositories on GitHub with the most stars."
 
-> **Note**: The cost-effective configuration may produce less stable outputs and require more iterations for complex tasks.
-
-> **Tip**: Feel free to experiment with your own model configurations! Found a great combination? Share it with the community in our [Discord](https://discord.gg/NN3ABHggMK) to help others optimize their setup.
-
-## 💡 See It In Action
-
-Here are some powerful tasks you can accomplish with just a sentence:
-
-1. **News Summary**:
-   > "Go to TechCrunch and extract top 10 headlines from the last 24 hours"
-
-2. **GitHub Research**:
-   > "Look for the trending Python repositories on GitHub with most stars"
-
-3. **Shopping Research**:
-   > "Find a portable Bluetooth speaker on Amazon with a water-resistant design, under $50. It should have a minimum battery life of 10 hours"
+3.  **Shopping Research**:
+    > "Find a portable Bluetooth speaker on Amazon with a water-resistant design, under $50, and a battery life of at least 10 hours."
 
 ## 🛠️ Roadmap
 
-We're actively developing AlphasineAssistant with exciting features on the horizon, welcome to join us! 
-
-Check out our detailed roadmap and upcoming features in our [GitHub Discussions](https://github.com/alphasine/AlphasineAssistant/discussions/85). 
+We are actively developing AlphasineAssistant. Check out our [roadmap](https://github.com/alphasine/AlphasineAssistant/discussions/85) for upcoming features.
 
 ## 🤝 Contributing
 
-**We need your help to make AlphasineAssistant even better!**  Contributions of all kinds are welcome:
+We welcome contributions of all kinds! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-*  **Share Prompts & Use Cases** 
-   * Join our [Discord server](https://discord.gg/NN3ABHggMK).
-   * share how you're using AlphasineAssistant.  Help us build a library of useful prompts and real-world use cases.
-*  **Provide Feedback** 
-   * Try AlphasineAssistant and give us feedback on its performance or suggest improvements in our [Discord server](https://discord.gg/NN3ABHggMK).
-* **Contribute Code**
-   * Check out our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute code to the project.
-   * Submit pull requests for bug fixes, features, or documentation improvements.
-
-
-We believe in the power of open source and community collaboration.  Join us in building the future of web automation!
-
+- **Share prompts and use cases** in our [Discord](https://discord.gg/NN3ABHggMK).
+- **Provide feedback** on performance or suggest improvements.
+- **Contribute code** by submitting a pull request.
 
 ## 🔒 Security
 
-If you discover a security vulnerability, please **DO NOT** disclose it publicly through issues, pull requests, or discussions.
-
-Instead, please create a [GitHub Security Advisory](https://github.com/alphasine/AlphasineAssistant/security/advisories/new) to report the vulnerability responsibly. This allows us to address the issue before it's publicly disclosed.
-
-We appreciate your help in keeping AlphasineAssistant and its users safe!
+If you discover a security vulnerability, please create a [GitHub Security Advisory](https://github.com/alphasine/AlphasineAssistant/security/advisories/new).
 
 ## 💬 Community
 
-Join our growing community of developers and users:
-
-- [Discord](https://discord.gg/NN3ABHggMK) - Chat with team and community
-- [Twitter](https://x.com/alphasine_ai) - Follow for updates and announcements
-- [GitHub Discussions](https://github.com/alphasine/AlphasineAssistant/discussions) - Share ideas and ask questions
+- [Discord](https://discord.gg/NN3ABHggMK): Chat with the team and community.
+- [Twitter](https://x.com/alphasine_ai): Follow for updates.
+- [GitHub Discussions](https://github.com/alphasine/AlphasineAssistant/discussions): Share ideas and ask questions.
 
 ## 👏 Acknowledgments
 
-AlphasineAssistant builds on top of other awesome open-source projects:
+AlphasineAssistant is built on these open-source projects:
 
 - [Browser Use](https://github.com/browser-use/browser-use)
 - [Puppeteer](https://github.com/EmergenceAI/Agent-E)
 - [Chrome Extension Boilerplate](https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite)
 - [LangChain](https://github.com/langchain-ai/langchainjs)
 
-Huge thanks to their creators and contributors!
-
-
 ## 📄 License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-Made with ❤️ by the AlphasineAssistant Team. 
-
-Like AlphasineAssistant? Give us a star 🌟 and join us in [Discord](https://discord.gg/NN3ABHggMK) | [X](https://x.com/alphasine_ai)
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
 
 
 

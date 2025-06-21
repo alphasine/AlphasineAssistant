@@ -1,72 +1,51 @@
-name: Bug Report
-description: Create a report to help us improve NanoBrowser
-title: "[Bug]: "
-labels: ["bug", "needs-triage"]
+name: 'Bug Report'
+description: 'Create a report to help us improve AlphasineAssistant'
+title: 'fix: '
+labels: 'bug'
 body:
   - type: markdown
     attributes:
-      value: |
-        Thanks for taking the time to fill out this bug report!
+      value: 'Before submitting, please make sure you are using the latest version of the extension.'
 
   - type: input
     id: version
     attributes:
-      label: Nanobrowser Version
-      description: What version of NanoBrowser are you running?
-      placeholder: e.g., 0.1.0
+      label: 'AlphasineAssistant Version'
+      description: 'What version of AlphasineAssistant are you running?'
     validations:
       required: true
 
   - type: textarea
-    id: description
-    attributes:
-      label: Bug Description
-      description: A clear and concise description of what the bug is
-      placeholder: Tell us what happened...
-    validations:
-      required: true
-      
-  - type: textarea
     id: reproduction
     attributes:
-      label: Steps to Reproduce
-      description: Steps to reproduce the behavior
+      label: 'Reproduction Steps'
+      description: 'Please provide a detailed step-by-step guide to reproduce the issue.'
       placeholder: |
-        1. My prompt is '...'
-        2. I click '...'
-        3. I see '...'
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
     validations:
       required: true
-      
-  - type: dropdown
-    id: llm_provider
-    attributes:
-      label: LLM Service Provider
-      description: Which LLM service provider are you using?
-      options:
-        - OpenAI
-        - Anthropic
-        - Google Gemini
-        - Ollama
-        - OpenRouter
-        - Other (please specify in description)
-    validations:
-      required: true
-      
+
   - type: textarea
-    id: models
+    id: expected
     attributes:
-      label: Models Used
-      description: Which models are you using for the 3 agents (Planner, Navigator, Validator)?
-      placeholder: |
-        Planner: gpt-4o
-        Navigator: claude-3.7-sonnet
-        Validator: gemini-2.0-flash
+      label: 'Expected behavior'
+      description: 'A clear and concise description of what you expected to happen.'
     validations:
       required: true
- 
+
   - type: textarea
-    id: screenshots
+    id: actual
     attributes:
-      label: Screenshots
-      description: If applicable, add screenshots to help explain your problem
+      label: 'Actual behavior'
+      description: 'A clear and concise description of what actually happened.'
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 'Additional context'
+      description: 'Add any other context or screenshots about the bug report here.'
