@@ -137,8 +137,11 @@ export function createChatHistoryStorage(): ChatHistoryStorage {
     },
 
     addMessage: async (sessionId: string, message: Message): Promise<ChatMessage> => {
+      const contentAsString = typeof message.content === 'string' ? message.content : JSON.stringify(message.content);
+
       const newMessage: ChatMessage = {
         ...message,
+        content: contentAsString,
         id: crypto.randomUUID(),
       };
 

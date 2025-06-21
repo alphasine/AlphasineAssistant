@@ -1,13 +1,20 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { FaMicrophone } from 'react-icons/fa';
+import { FaMicrophone, FaTimes } from 'react-icons/fa';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 
+export interface ChatInputPayload {
+  text: string;
+  image?: string; // base64 data URL
+}
+
 interface ChatInputProps {
-  onSendMessage: (text: string) => void;
+  onSendMessage: (payload: ChatInputPayload) => void;
   onStopTask: () => void;
+  onPauseResumeTask: () => void;
   onMicClick?: () => void;
   isRecording?: boolean;
   isProcessingSpeech?: boolean;
+  isPaused: boolean;
   disabled: boolean;
   showStopButton: boolean;
   setContent?: (setter: (text: string) => void) => void;
@@ -17,16 +24,22 @@ interface ChatInputProps {
 export default function ChatInput({
   onSendMessage,
   onStopTask,
+  onPauseResumeTask,
   onMicClick,
   isRecording = false,
   isProcessingSpeech = false,
+  isPaused,
   disabled,
   showStopButton,
   setContent,
   isDarkMode = false,
 }: ChatInputProps) {
   const [text, setText] = useState('');
-  const isSendButtonDisabled = useMemo(() => disabled || text.trim() === '', [disabled, text]);
+  const [pastedImage, setPastedImage] = useState<string | null>(null);
+  const isSendButtonDisabled = useMemo(
+    () => disabled || (text.trim() === '' && !pastedImage),
+    [disabled, text, pastedImage],
+  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Handle text changes and resize textarea
@@ -39,6 +52,24 @@ export default function ChatInput({
     if (textarea) {
       textarea.style.height = 'auto';
       textarea.style.height = `${Math.min(textarea.scrollHeight, 100)}px`;
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = Array.from(e.clipboardData.items);
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = event => {
+            setPastedImage(event.target?.result as string);
+          };
+          reader.readAsDataURL(file);
+        }
+        break;
+      }
     }
   };
 
@@ -61,19 +92,20 @@ export default function ChatInput({
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
-      if (text.trim()) {
-        onSendMessage(text);
+      if (text.trim() || pastedImage) {
+        onSendMessage({ text, image: pastedImage || undefined });
         setText('');
+        setPastedImage(null);
       }
     },
-    [text, onSendMessage],
+    [text, pastedImage, onSendMessage],
   );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
         e.preventDefault();
-        handleSubmit(e);
+        handleSubmit(e as unknown as React.FormEvent);
       }
     },
     [handleSubmit],
@@ -85,14 +117,27 @@ export default function ChatInput({
       className={`overflow-hidden rounded-lg border transition-colors ${disabled ? 'cursor-not-allowed' : 'focus-within:border-sky-400 hover:border-sky-400'} ${isDarkMode ? 'border-slate-700' : ''}`}
       aria-label="Chat input form">
       <div className="flex flex-col">
+        {pastedImage && (
+          <div className="relative self-start p-2">
+            <img src={pastedImage} alt="Pasted content" className="h-20 w-auto rounded-md" />
+            <button
+              type="button"
+              onClick={() => setPastedImage(null)}
+              className="absolute -right-1 -top-1 rounded-full bg-gray-700 p-1 text-white opacity-75 hover:opacity-100"
+              aria-label="Remove image">
+              <FaTimes className="size-3" />
+            </button>
+          </div>
+        )}
         <textarea
           ref={textareaRef}
           value={text}
           onChange={handleTextChange}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           disabled={disabled}
           aria-disabled={disabled}
-          rows={5}
+          rows={1}
           className={`w-full resize-none border-none p-2 focus:outline-none ${
             disabled
               ? isDarkMode
@@ -102,7 +147,7 @@ export default function ChatInput({
                 ? 'bg-slate-800 text-gray-200'
                 : 'bg-white'
           }`}
-          placeholder="What can I help you with?"
+          placeholder="What can I help you with? You can also paste images."
           aria-label="Message input"
         />
 
@@ -138,12 +183,22 @@ export default function ChatInput({
           </div>
 
           {showStopButton ? (
-            <button
-              type="button"
-              onClick={onStopTask}
-              className="rounded-md bg-red-500 px-3 py-1 text-white transition-colors hover:bg-red-600">
-              Stop
-            </button>
+            <div className="flex space-x-2">
+              <button
+                type="button"
+                onClick={onPauseResumeTask}
+                className={`rounded-md px-3 py-1 text-white transition-colors ${
+                  isPaused ? 'bg-green-500 hover:bg-green-600' : 'bg-yellow-500 hover:bg-yellow-600'
+                }`}>
+                {isPaused ? 'Resume' : 'Pause'}
+              </button>
+              <button
+                type="button"
+                onClick={onStopTask}
+                className="rounded-md bg-red-500 px-3 py-1 text-white transition-colors hover:bg-red-600">
+                Stop
+              </button>
+            </div>
           ) : (
             <button
               type="submit"

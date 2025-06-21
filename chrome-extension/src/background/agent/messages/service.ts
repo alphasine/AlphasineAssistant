@@ -2,6 +2,7 @@ import { type BaseMessage, AIMessage, HumanMessage, type SystemMessage, ToolMess
 import { MessageHistory, MessageMetadata } from '@src/background/agent/messages/views';
 import { createLogger } from '@src/background/log';
 import { wrapUserRequest } from '@src/background/agent/messages/utils';
+import type { AgentContext } from '../types';
 
 const logger = createLogger('MessageManager');
 
@@ -40,11 +41,17 @@ export default class MessageManager {
   private history: MessageHistory;
   private toolId: number;
   private settings: MessageManagerSettings;
+  private context?: AgentContext;
 
-  constructor(settings: MessageManagerSettings = new MessageManagerSettings()) {
+  constructor(settings: MessageManagerSettings = new MessageManagerSettings(), context?: AgentContext) {
     this.settings = settings;
     this.history = new MessageHistory();
     this.toolId = 1;
+    this.context = context;
+  }
+
+  public setContext(context: AgentContext): void {
+    this.context = context;
   }
 
   public initTaskMessages(systemMessage: SystemMessage, task: string, messageContext?: string): void {
@@ -60,7 +67,17 @@ export default class MessageManager {
     }
 
     // Add task instructions
-    const taskMessage = MessageManager.taskInstructions(task);
+    let taskMessage: HumanMessage;
+    if (this.context?.options.useVision && this.context.image) {
+      taskMessage = new HumanMessage({
+        content: [
+          { type: 'text', text: `Your ultimate task is: """${task}"""` },
+          { type: 'image_url', image_url: { url: this.context.image } },
+        ],
+      });
+    } else {
+      taskMessage = MessageManager.taskInstructions(task);
+    }
     this.addMessageWithTokens(taskMessage, 'init');
 
     // Add sensitive data info if sensitive data is provided
@@ -157,9 +174,22 @@ export default class MessageManager {
    * @param newTask - The raw description of the new task
    */
   public addNewTask(newTask: string): void {
-    const content = `Your new ultimate task is: """${newTask}""". This is a follow-up of the previous tasks. Make sure to take all of the previous context into account and finish your new ultimate task.`;
-    const wrappedContent = wrapUserRequest(content);
-    const msg = new HumanMessage({ content: wrappedContent });
+    let msg: HumanMessage;
+    if (this.context?.options.useVision && this.context.image) {
+      msg = new HumanMessage({
+        content: [
+          {
+            type: 'text',
+            text: `Your new ultimate task is: """${newTask}""". This is a follow-up of the previous tasks. Make sure to take all of the previous context into account and finish your new ultimate task.`,
+          },
+          { type: 'image_url', image_url: { url: this.context.image } },
+        ],
+      });
+    } else {
+      const content = `Your new ultimate task is: """${newTask}""". This is a follow-up of the previous tasks. Make sure to take all of the previous context into account and finish your new ultimate task.`;
+      const wrappedContent = wrapUserRequest(content);
+      msg = new HumanMessage({ content: wrappedContent });
+    }
     this.addMessageWithTokens(msg);
   }
 

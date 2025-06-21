@@ -1,5 +1,5 @@
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { AgentContext, type AgentOptions } from './types';
+import { AgentContext, type AgentOptions, DEFAULT_AGENT_OPTIONS } from './types';
 import { NavigatorAgent, NavigatorActionRegistry } from './agents/navigator';
 import { PlannerAgent, type PlannerOutput } from './agents/planner';
 import { ValidatorAgent } from './agents/validator';
@@ -34,7 +34,7 @@ export class Executor {
   private readonly validatorPrompt: ValidatorPrompt;
   private tasks: string[] = [];
   constructor(
-    task: string,
+    payload: { text: string; image?: string },
     taskId: string,
     browserContext: BrowserContext,
     navigatorLLM: BaseChatModel,
@@ -46,18 +46,14 @@ export class Executor {
     const validatorLLM = extraArgs?.validatorLLM ?? navigatorLLM;
     const extractorLLM = extraArgs?.extractorLLM ?? navigatorLLM;
     const eventManager = new EventManager();
-    const context = new AgentContext(
-      taskId,
-      browserContext,
-      messageManager,
-      eventManager,
-      extraArgs?.agentOptions ?? {},
-    );
+    const agentOptions = { ...DEFAULT_AGENT_OPTIONS, ...(extraArgs?.agentOptions ?? {}) };
+    const context = new AgentContext(taskId, browserContext, messageManager, eventManager, agentOptions, payload.image);
+    messageManager.setContext(context);
 
-    this.tasks.push(task);
+    this.tasks.push(payload.text);
     this.navigatorPrompt = new NavigatorPrompt(context.options.maxActionsPerStep);
     this.plannerPrompt = new PlannerPrompt();
-    this.validatorPrompt = new ValidatorPrompt(task);
+    this.validatorPrompt = new ValidatorPrompt(payload.text);
 
     const actionBuilder = new ActionBuilder(context, extractorLLM);
     const navigatorActionRegistry = new NavigatorActionRegistry(actionBuilder.buildDefaultActions());
@@ -83,7 +79,7 @@ export class Executor {
 
     this.context = context;
     // Initialize message history
-    this.context.messageManager.initTaskMessages(this.navigatorPrompt.getSystemMessage(), task);
+    this.context.messageManager.initTaskMessages(this.navigatorPrompt.getSystemMessage(), payload.text);
   }
 
   subscribeExecutionEvents(callback: EventCallback): void {
@@ -95,11 +91,11 @@ export class Executor {
     this.context.eventManager.clearSubscribers(EventType.EXECUTION);
   }
 
-  addFollowUpTask(task: string): void {
-    this.tasks.push(task);
-    this.context.messageManager.addNewTask(task);
+  addFollowUpTask(payload: { text: string; image?: string }): void {
+    this.tasks.push(payload.text);
+    this.context.messageManager.addNewTask(payload.text);
     // update validator prompt
-    this.validatorPrompt.addFollowUpTask(task);
+    this.validatorPrompt.addFollowUpTask(payload.text);
 
     // need to reset previous action results that are not included in memory
     this.context.actionResults = this.context.actionResults.filter(result => result.includeInMemory);
@@ -287,10 +283,14 @@ export class Executor {
 
   async resume(): Promise<void> {
     this.context.resume();
+    // Give a short grace period before allowing auto-pausing again
+    await new Promise(resolve => setTimeout(resolve, 500));
+    this.context.emitEvent(Actors.SYSTEM, ExecutionState.TASK_RESUME, 'Task resumed by user');
   }
 
   async pause(): Promise<void> {
     this.context.pause();
+    this.context.emitEvent(Actors.SYSTEM, ExecutionState.TASK_PAUSE, 'Task paused by user');
   }
 
   async cleanup(): Promise<void> {

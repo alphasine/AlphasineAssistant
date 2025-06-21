@@ -28,6 +28,49 @@ interface MessageBlockProps {
   isDarkMode?: boolean;
 }
 
+function MessageContent({ content, isDarkMode }: { content: string | any[]; isDarkMode?: boolean }) {
+  let parsedContent: any[] = [];
+
+  if (typeof content === 'string') {
+    try {
+      // Try to parse the string to see if it's a JSON array
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed)) {
+        parsedContent = parsed;
+      } else {
+        // It's a plain string, wrap it in the array structure
+        parsedContent = [{ type: 'text', text: content }];
+      }
+    } catch (e) {
+      // Not a JSON string, treat as plain text
+      parsedContent = [{ type: 'text', text: content }];
+    }
+  } else if (Array.isArray(content)) {
+    parsedContent = content;
+  }
+
+  return (
+    <div className={`whitespace-pre-wrap break-words text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+      {parsedContent.map((part, index) => {
+        if (part.type === 'text') {
+          return <span key={index}>{part.text}</span>;
+        }
+        if (part.type === 'image_url') {
+          return (
+            <img
+              key={index}
+              src={part.image_url.url}
+              alt="User provided content"
+              className="mt-2 max-w-full rounded-md"
+            />
+          );
+        }
+        return null;
+      })}
+    </div>
+  );
+}
+
 function MessageBlock({ message, isSameActor, isDarkMode = false }: MessageBlockProps) {
   if (!message.actor) {
     console.error('No actor found');
@@ -66,7 +109,7 @@ function MessageBlock({ message, isSameActor, isDarkMode = false }: MessageBlock
                 <div className="animate-progress h-full bg-blue-500" />
               </div>
             ) : (
-              message.content
+              <MessageContent content={message.content} isDarkMode={isDarkMode} />
             )}
           </div>
           {!isProgress && (

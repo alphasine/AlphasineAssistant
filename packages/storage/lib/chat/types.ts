@@ -8,12 +8,13 @@ export enum Actors {
 
 export interface Message {
   actor: Actors;
-  content: string;
+  content: string | any[];
   timestamp: number; // Unix timestamp in milliseconds
 }
 
 export interface ChatMessage extends Message {
   id: string; // Unique ID for each message
+  content: string; // Ensure stored content is always a string
 }
 
 export interface ChatSessionMetadata {

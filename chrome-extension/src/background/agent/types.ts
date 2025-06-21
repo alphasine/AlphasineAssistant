@@ -62,20 +62,23 @@ export class AgentContext {
   stepInfo: AgentStepInfo | null;
   actionResults: ActionResult[];
   stateMessageAdded: boolean;
+  image?: string;
+
   constructor(
     taskId: string,
     browserContext: BrowserContext,
     messageManager: MessageManager,
     eventManager: EventManager,
-    options: Partial<AgentOptions>,
+    options: AgentOptions,
+    image?: string,
   ) {
     this.controller = new AbortController();
     this.taskId = taskId;
     this.browserContext = browserContext;
     this.messageManager = messageManager;
     this.eventManager = eventManager;
-    this.options = { ...DEFAULT_AGENT_OPTIONS, ...options };
-
+    this.options = options;
+    this.image = image;
     this.paused = false;
     this.stopped = false;
     this.nSteps = 0;
@@ -106,7 +109,7 @@ export class AgentContext {
 
   async stop() {
     this.stopped = true;
-    setTimeout(() => this.controller.abort(), 300);
+    this.controller.abort();
   }
 }
 

@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { RxDiscordLogo } from 'react-icons/rx';
+import { FaGithub } from 'react-icons/fa';
 import { FiSettings } from 'react-icons/fi';
 import { PiPlusBold } from 'react-icons/pi';
 import { GrHistory } from 'react-icons/gr';
 import { type Message, Actors, chatHistoryStore, agentModelStore } from '@extension/storage';
 import favoritesStorage, { type FavoritePrompt } from '@extension/storage/lib/prompt/favorites';
 import MessageList from './components/MessageList';
-import ChatInput from './components/ChatInput';
+import ChatInput, { type ChatInputPayload } from './components/ChatInput';
 import ChatHistoryList from './components/ChatHistoryList';
 import BookmarkList from './components/BookmarkList';
 import { EventType, type AgentEvent, ExecutionState } from './types/event';
@@ -34,6 +34,7 @@ const SidePanel = () => {
   const [hasConfiguredModels, setHasConfiguredModels] = useState<boolean | null>(null); // null = loading, false = no models, true = has models
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessingSpeech, setIsProcessingSpeech] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const sessionIdRef = useRef<string | null>(null);
   const portRef = useRef<chrome.runtime.Port | null>(null);
   const heartbeatIntervalRef = useRef<number | null>(null);
@@ -100,6 +101,13 @@ const SidePanel = () => {
   }, [checkModelConfiguration]);
 
   useEffect(() => {
+    setupConnection();
+    return () => {
+      stopConnection();
+    };
+  }, []);
+
+  useEffect(() => {
     sessionIdRef.current = currentSessionId;
   }, [currentSessionId]);
 
@@ -140,6 +148,7 @@ const SidePanel = () => {
             case ExecutionState.TASK_START:
               // Reset historical session flag when a new task starts
               setIsHistoricalSession(false);
+              setShowStopButton(true);
               break;
             case ExecutionState.TASK_OK:
               // Play success sound
@@ -158,11 +167,14 @@ const SidePanel = () => {
               setIsFollowUpMode(false);
               setInputEnabled(true);
               setShowStopButton(false);
-              skip = false;
               break;
             case ExecutionState.TASK_PAUSE:
+              setIsPaused(true);
+              setInputEnabled(true);
               break;
             case ExecutionState.TASK_RESUME:
+              setIsPaused(false);
+              setInputEnabled(false);
               break;
             default:
               console.error('Invalid task state', state);
@@ -419,95 +431,64 @@ const SidePanel = () => {
     }
   };
 
-  const handleSendMessage = async (text: string) => {
-    console.log('handleSendMessage', text);
-
-    // Trim the input text first
-    const trimmedText = text.trim();
-
-    if (!trimmedText) return;
-
-    // Check if the input is a command (starts with /)
-    if (trimmedText.startsWith('/')) {
-      // Process command and return if it was handled
-      const wasHandled = await handleCommand(trimmedText);
-      if (wasHandled) return;
-    }
-
-    // Block sending messages in historical sessions
-    if (isHistoricalSession) {
-      console.log('Cannot send messages in historical sessions');
+  const handleSendMessage = async (payload: ChatInputPayload) => {
+    const { text, image } = payload;
+    if (text.trim() === '' && !image) {
       return;
     }
 
-    try {
-      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-      const tabId = tabs[0]?.id;
-      if (!tabId) {
-        throw new Error('No active tab found');
-      }
+    // Check if the input is a command (starts with /)
+    if (text.trim().startsWith('/')) {
+      const wasHandled = await handleCommand(text.trim());
+      if (wasHandled) return;
+    }
 
-      setInputEnabled(false);
-      setShowStopButton(true);
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-      // Create a new chat session for this task if not in follow-up mode
-      if (!isFollowUpMode) {
-        const newSession = await chatHistoryStore.createSession(
-          text.substring(0, 50) + (text.length > 50 ? '...' : ''),
-        );
-        console.log('newSession', newSession);
+    setInputEnabled(false);
+    setShowStopButton(true);
 
-        // Store the session ID in both state and ref
-        const sessionId = newSession.id;
-        setCurrentSessionId(sessionId);
-        sessionIdRef.current = sessionId;
-      }
+    // Create a new session ID if one doesn't exist
+    if (!currentSessionId) {
+      const newSession = await chatHistoryStore.createSession(text || '(Image)');
+      setCurrentSessionId(newSession.id);
+      // Update the ref immediately
+      sessionIdRef.current = newSession.id;
+    }
 
-      const userMessage = {
+    const content: any[] = [{ type: 'text', text }];
+    if (image) {
+      content.push({ type: 'image_url', image_url: { url: image } });
+    }
+
+    appendMessage(
+      {
         actor: Actors.USER,
-        content: text,
+        content: content,
         timestamp: Date.now(),
-      };
+      },
+      // Pass the current session ID to appendMessage
+      currentSessionId,
+    );
 
-      // Pass the sessionId directly to appendMessage
-      appendMessage(userMessage, sessionIdRef.current);
-
-      // Setup connection if not exists
-      if (!portRef.current) {
-        setupConnection();
-      }
-
-      // Send message using the utility function
-      if (isFollowUpMode) {
-        // Send as follow-up task
-        await sendMessage({
-          type: 'follow_up_task',
-          task: text,
-          taskId: sessionIdRef.current,
-          tabId,
-        });
-        console.log('follow_up_task sent', text, tabId, sessionIdRef.current);
-      } else {
-        // Send as new task
-        await sendMessage({
-          type: 'new_task',
-          task: text,
-          taskId: sessionIdRef.current,
-          tabId,
-        });
-        console.log('new_task sent', text, tabId, sessionIdRef.current);
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error('Task error', errorMessage);
-      appendMessage({
-        actor: Actors.SYSTEM,
-        content: errorMessage,
-        timestamp: Date.now(),
+    // If in follow-up mode or paused, send a follow-up task
+    if (isFollowUpMode || isPaused) {
+      await portRef.current?.postMessage({
+        type: 'follow_up_task',
+        task: JSON.stringify(payload),
+        tabId: activeTab.id,
       });
-      setInputEnabled(true);
-      setShowStopButton(false);
-      stopConnection();
+      if (isPaused) {
+        setIsPaused(false); // Resume after sending
+      }
+      return;
+    }
+
+    // Start a new task
+    await portRef.current?.postMessage({ type: 'new_task', task: JSON.stringify(payload), tabId: activeTab.id });
+
+    if (activeTab.id) {
+      chrome.tabs.update(activeTab.id, { active: true });
     }
   };
 
@@ -529,6 +510,15 @@ const SidePanel = () => {
     setShowStopButton(false);
   };
 
+  const handlePauseResumeTask = async () => {
+    // This function should only handle resuming without a new message
+    if (isPaused) {
+      portRef.current?.postMessage({ type: 'resume_task' });
+    } else {
+      portRef.current?.postMessage({ type: 'pause_task' });
+    }
+  };
+
   const handleNewChat = () => {
     // Clear messages and start a new chat
     setMessages([]);
@@ -539,8 +529,14 @@ const SidePanel = () => {
     setIsFollowUpMode(false);
     setIsHistoricalSession(false);
 
-    // Disconnect any existing connection
+    // Cancel any ongoing task in the background
+    portRef.current?.postMessage({
+      type: 'cancel_task',
+    });
+
+    // Disconnect and reconnect to ensure a fresh state
     stopConnection();
+    setupConnection();
   };
 
   const loadChatSessions = useCallback(async () => {
@@ -624,7 +620,6 @@ const SidePanel = () => {
   };
 
   const handleBookmarkSelect = (content: string) => {
-    console.log('handleBookmarkSelect', content);
     if (setInputTextRef.current) {
       setInputTextRef.current(content);
     }
@@ -922,11 +917,11 @@ const SidePanel = () => {
               </>
             )}
             <a
-              href="https://discord.gg/NN3ABHggMK"
+              href="https://github.com/alphasine/AlphasineAssistant"
               target="_blank"
               rel="noopener noreferrer"
               className={`header-icon ${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-400 hover:text-sky-500'}`}>
-              <RxDiscordLogo size={20} />
+              <FaGithub size={20} />
             </a>
             <button
               type="button"
@@ -968,9 +963,9 @@ const SidePanel = () => {
               <div
                 className={`flex flex-1 items-center justify-center p-8 ${isDarkMode ? 'text-sky-300' : 'text-sky-600'}`}>
                 <div className="max-w-md text-center">
-                  <img src="/icon-128.png" alt="Nanobrowser Logo" className="mx-auto mb-4 size-12" />
+                  <img src="/icon-128.png" alt="AlphasineAssistant Logo" className="mx-auto mb-4 size-12" />
                   <h3 className={`mb-2 text-lg font-semibold ${isDarkMode ? 'text-sky-200' : 'text-sky-700'}`}>
-                    Welcome to Nanobrowser!
+                    Welcome to AlphasineAssistant!
                   </h3>
                   <p className="mb-4">To get started, please configure your API keys in the settings page.</p>
                   <button
@@ -982,19 +977,11 @@ const SidePanel = () => {
                   </button>
                   <div className="mt-4 text-sm opacity-75">
                     <a
-                      href="https://github.com/nanobrowser/nanobrowser?tab=readme-ov-file#-quick-start"
+                      href="https://github.com/alphasine/AlphasineAssistant"
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-600'}`}>
                       Quick Start Guide
-                    </a>
-                    <span className="mx-2">•</span>
-                    <a
-                      href="https://discord.gg/NN3ABHggMK"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`${isDarkMode ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-600'}`}>
-                      Join Our Community
                     </a>
                   </div>
                 </div>
@@ -1011,9 +998,11 @@ const SidePanel = () => {
                       <ChatInput
                         onSendMessage={handleSendMessage}
                         onStopTask={handleStopTask}
+                        onPauseResumeTask={handlePauseResumeTask}
                         onMicClick={handleMicClick}
                         isRecording={isRecording}
                         isProcessingSpeech={isProcessingSpeech}
+                        isPaused={isPaused}
                         disabled={!inputEnabled || isHistoricalSession}
                         showStopButton={showStopButton}
                         setContent={setter => {
@@ -1048,9 +1037,11 @@ const SidePanel = () => {
                     <ChatInput
                       onSendMessage={handleSendMessage}
                       onStopTask={handleStopTask}
+                      onPauseResumeTask={handlePauseResumeTask}
                       onMicClick={handleMicClick}
                       isRecording={isRecording}
                       isProcessingSpeech={isProcessingSpeech}
+                      isPaused={isPaused}
                       disabled={!inputEnabled || isHistoricalSession}
                       showStopButton={showStopButton}
                       setContent={setter => {

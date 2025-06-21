@@ -108,8 +108,9 @@ chrome.runtime.onConnect.addListener(port => {
             if (!message.task) return port.postMessage({ type: 'error', error: 'No task provided' });
             if (!message.tabId) return port.postMessage({ type: 'error', error: 'No tab ID provided' });
 
-            logger.info('new_task', message.tabId, message.task);
-            currentExecutor = await setupExecutor(message.taskId, message.task, browserContext);
+            const payload = JSON.parse(message.task);
+            logger.info('new_task', message.tabId, payload);
+            currentExecutor = await setupExecutor(message.taskId, payload, browserContext);
             subscribeToExecutorEvents(currentExecutor);
 
             const result = await currentExecutor.execute();
@@ -120,11 +121,12 @@ chrome.runtime.onConnect.addListener(port => {
             if (!message.task) return port.postMessage({ type: 'error', error: 'No follow up task provided' });
             if (!message.tabId) return port.postMessage({ type: 'error', error: 'No tab ID provided' });
 
-            logger.info('follow_up_task', message.tabId, message.task);
+            const payload = JSON.parse(message.task);
+            logger.info('follow_up_task', message.tabId, payload);
 
             // If executor exists, add follow-up task
             if (currentExecutor) {
-              currentExecutor.addFollowUpTask(message.task);
+              currentExecutor.addFollowUpTask(payload);
               // Re-subscribe to events in case the previous subscription was cleaned up
               subscribeToExecutorEvents(currentExecutor);
               const result = await currentExecutor.execute();
@@ -246,13 +248,17 @@ chrome.runtime.onConnect.addListener(port => {
   }
 });
 
-async function setupExecutor(taskId: string, task: string, browserContext: BrowserContext) {
+async function setupExecutor(
+  taskId: string,
+  payload: { text: string; image?: string },
+  browserContext: BrowserContext,
+) {
   const providers = await llmProviderStore.getAllProviders();
+  const agentModels = await agentModelStore.getAllAgentModels();
   // if no providers, need to display the options page
   if (Object.keys(providers).length === 0) {
     throw new Error('Please configure API keys in the settings first');
   }
-  const agentModels = await agentModelStore.getAllAgentModels();
   // verify if every provider used in the agent models exists in the providers
   for (const agentModel of Object.values(agentModels)) {
     if (!providers[agentModel.provider]) {
@@ -304,9 +310,15 @@ async function setupExecutor(taskId: string, task: string, browserContext: Brows
     displayHighlights: generalSettings.displayHighlights,
   });
 
-  const executor = new Executor(task, taskId, browserContext, navigatorLLM, {
-    plannerLLM: plannerLLM ?? navigatorLLM,
-    validatorLLM: validatorLLM ?? navigatorLLM,
+  const llms = {
+    [AgentNameEnum.Navigator]: navigatorLLM,
+    [AgentNameEnum.Planner]: plannerLLM ?? navigatorLLM,
+    [AgentNameEnum.Validator]: validatorLLM ?? navigatorLLM,
+  };
+
+  const executor = new Executor(payload, taskId, browserContext, llms[AgentNameEnum.Navigator], {
+    plannerLLM: llms[AgentNameEnum.Planner],
+    validatorLLM: llms[AgentNameEnum.Validator],
     agentOptions: {
       maxSteps: generalSettings.maxSteps,
       maxFailures: generalSettings.maxFailures,
