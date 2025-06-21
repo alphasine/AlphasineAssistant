@@ -50,18 +50,14 @@ AlphasineAssistant es una herramienta de automatización web con IA que se ejecu
 
 ## 🚀 Inicio Rápido
 
-1. **Instala desde Chrome Web Store** (Versión Estable):
-   * Visita la [página de AlphasineAssistant en Chrome Web Store](https://chromewebstore.google.com/detail/AlphasineAssistant/imbddededgmcgfhfpcjmijokokekbkal)
-   * Haz clic en el botón "Añadir a Chrome"
-   * Confirma la instalación cuando se te solicite
+1.  **Instalación Manual**:
+    - Sigue los pasos en la sección "Instalación Manual" a continuación para comenzar.
 
-> **Nota Importante**: Para acceder a las funciones más recientes, instala desde ["Instalar Última Versión Manualmente"](#-instalar-última-versión-manualmente) abajo, ya que la versión de Chrome Web Store puede tardar en actualizarse debido al proceso de revisión.
+2.  **Configurar Modelos de Agente**:
+    - Abre la barra lateral de AlphasineAssistant y haz clic en el ícono de `Configuración`.
+    - Agrega tus claves de API de LLM y elige los modelos para los agentes Navegador, Planificador y Validador.
 
-2. **Configurar Modelos de Agente**:
-   * Haz clic en el icono de AlphasineAssistant ubicado en la barra de herramientas para abrir el panel lateral
-   * Haz clic en el icono de `Settings` (arriba a la derecha)
-   * Agrega tus claves de API del LLM
-   * Elige qué modelo usar para cada agente (Navigator, Planner, Validator)
+> Para obtener las últimas funciones, recomendamos una instalación manual.
 
 ## 🔧 Instalar Última Versión Manualmente
 

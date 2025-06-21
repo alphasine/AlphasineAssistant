@@ -62,15 +62,14 @@
 
 ## 🚀 Quick Start
 
-1.  **Install from Chrome Web Store**:
-    - Visit the [AlphasineAssistant Chrome Web Store page](https://chromewebstore.google.com/detail/AlphasineAssistant/imbddededgmcgfhfpcjmijokokekbkal).
-    - Click "Add to Chrome" and confirm the installation.
+1.  **Manual Installation**:
+    - Follow the steps in the "Manual Installation" section below to get started.
 
 2.  **Configure Agent Models**:
     - Open the AlphasineAssistant sidebar and click the `Settings` icon.
     - Add your LLM API keys and choose the models for the Navigator, Planner, and Validator agents.
 
-> For the latest features, we recommend a manual installation, as the Chrome Web Store version may have review delays.
+> For the latest features, we recommend a manual installation.
 
 ## 🔧 Manual Installation
 

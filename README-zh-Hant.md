@@ -50,18 +50,14 @@ AlphasineAssistant 是一個在瀏覽器中運行的開源 AI 網頁自動化工
 
 ## 🚀 快速開始
 
-1. **從 Chrome Web Store 安裝**（穩定版）：
-   * 訪問 [AlphasineAssistant Chrome Web Store 頁面](https://chromewebstore.google.com/detail/AlphasineAssistant/imbddededgmcgfhfpcjmijokokekbkal)
-   * 點擊「加到 Chrome」按鈕
-   * 確認安裝
+1.  **手動安裝**:
+    - 請依照下方的「手動安裝」部分中的步驟開始。
 
-> **重要提示**：如需最新功能，請從下方的[「手動安裝最新版本」](#-手動安裝最新版本)安裝，因為 Chrome Web Store 版本可能會因審核流程而延遲。
+2.  **設定代理模型**:
+    - 開啟 AlphasineAssistant 側邊欄，然後點擊「設定」圖示。
+    - 新增您的 LLM API 金鑰，並為導航器、規劃器和驗證器代理選擇模型。
 
-2. **配置代理模型**：
-   * 點擊工具欄中的 AlphasineAssistant 圖標打開側邊欄
-   * 點擊 `設置` 圖標（右上角）
-   * 添加您的 LLM API keys
-   * 選擇為不同代理（Navigator、Planner、Validator）使用的模型
+> 若要使用最新功能，我們建議您手動安裝。
 
 ## 🔧 手動安裝最新版本
 
